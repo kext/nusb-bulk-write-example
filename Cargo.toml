@@ -1,0 +1,9 @@
+[package]
+name = "nusb-bulk-write"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ctrlc = "3.4.5"
+futures-lite = "2.6.0"
+nusb = "0.1.12"
