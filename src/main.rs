@@ -6,6 +6,8 @@ use std::{
     time::Instant,
 };
 
+const PACKET_SIZE: usize = 64;
+
 fn main() {
     let interface = nusb::list_devices()
         .unwrap()
@@ -27,7 +29,7 @@ fn main() {
     println!("Filling queue");
     for queue in &mut queues {
         for _ in 0..128 {
-            queue.submit(vec![0; 128]);
+            queue.submit(vec![0; PACKET_SIZE]);
         }
     }
     let mut t0 = Instant::now();
@@ -36,7 +38,7 @@ fn main() {
         for queue in &mut queues {
             match futures_lite::future::block_on(queue.next_complete()).into_result() {
                 Ok(v) => {
-                    n += 64;
+                    n += PACKET_SIZE;
                     if n >= 1_000_000 {
                         let t = Instant::now();
                         let d = t.duration_since(t0).as_secs_f64();
@@ -49,7 +51,7 @@ fn main() {
                         n = 0;
                     }
                     let mut v = v.reuse();
-                    v.resize(64, 0);
+                    v.resize(PACKET_SIZE, 0);
                     queue.submit(v);
                 }
                 Err(e) => {
